@@ -21,7 +21,7 @@ public class ZipReceiver {
 //	private static final String ZIP_FILE_NAME = "received.zip";
 
     @KafkaListener(topics = "my-zip-file-topic", groupId = "my-group")
-    public void receiveZipFile(@Payload byte[] message, @Headers MessageHeaders headers) throws IOException {
+    public ZipEntry receiveZipFile(@Payload byte[] message, @Headers MessageHeaders headers) throws IOException {
         try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(message))) {
             ZipEntry zipEntry = zipInputStream.getNextEntry();
             while (zipEntry != null) {
@@ -39,6 +39,7 @@ public class ZipReceiver {
                 }
                 zipEntry = zipInputStream.getNextEntry();
             }
+            return zipEntry;
         }
     }
 

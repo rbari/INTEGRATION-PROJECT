@@ -28,20 +28,23 @@ public class ZipController {
 
 	@Autowired
 	ZipClient zipClient;
+	@Autowired
+	private Sender sender;
 //	@Autowired
 //	private ZipClient zipClient;
 	
     @GetMapping(value = "/zip", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public ResponseEntity<Resource> downloadZip( ) {
+    public ResponseEntity<Resource> downloadZip(@RequestParam("service-name") String serviceName ) {
     	
-    	String filename = "najkaj";
-    	Resource resource = zipClient.downloadFile(filename);
+    	Resource resource = zipClient.downloadFile( serviceName);
         try(InputStream inputStream = resource.getInputStream()) {
         	 byte[] data = IOUtils.toByteArray(inputStream);
              ByteArrayResource resourceResponse = new ByteArrayResource(data);
+             RequestWrapper rWrapper = new RequestWrapper(serviceName, serviceName);
+             sender.send("download", rWrapper);
             return ResponseEntity.ok()
             		 .contentLength(data.length)
-                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename + ".zip")
+                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + serviceName + ".zip")
                      .contentType(MediaType.APPLICATION_OCTET_STREAM)
                      .body(resourceResponse);
         } catch (Exception ex) {
