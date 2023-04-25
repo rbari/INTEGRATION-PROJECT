@@ -28,11 +28,6 @@ public class ZipController {
 
 	@Autowired
 	ZipClient zipClient;
-	@RequestMapping("/saluda/{name}")
-	public String termino(@PathVariable("name") String name) {
-		return zipClient.saludando(name);
-		
-	}
 //	@Autowired
 //	private ZipClient zipClient;
 	
@@ -54,8 +49,4 @@ public class ZipController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-	@GetMapping(value = "/hi")
-	public String hola (){
-		return "hola mundo";
-	}
 }

@@ -14,6 +14,4 @@ public interface ZipClient {
 	 @GetMapping(value = "/download/{filename}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
 	  Resource downloadFile(@PathVariable("filename") String filename);
 	
-	@RequestMapping("/hi/{name}")
-	public String saludando(@PathVariable ("name") String name);
 }
