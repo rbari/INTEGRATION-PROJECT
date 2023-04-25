@@ -1,6 +1,8 @@
 package UnzipService;
 
-public class RequestWrapper {
+import java.io.Serializable;
+
+public class RequestWrapper implements Serializable {
 
     private String zipFilePath;
     private String serviceName;

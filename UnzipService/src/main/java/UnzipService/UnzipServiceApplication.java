@@ -20,7 +20,7 @@ public class UnzipServiceApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-//		RequestWrapper responseWrapper = new RequestWrapper("test path","test Service Namee");
-//		sender.send("fileunziped",responseWrapper);
+//		RequestWrapper responseWrapper = new RequestWrapper("new test","test Service Name");
+//		sender.send("filedownloaded",responseWrapper);
 	}
 }

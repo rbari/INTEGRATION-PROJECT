@@ -31,6 +31,7 @@ public class KafkaConfigurationClass {
         props.put("value.serializer", JsonSerializer.class);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+        props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
 
         return new DefaultKafkaConsumerFactory<>(props);
     }
@@ -55,6 +56,7 @@ public class KafkaConfigurationClass {
         configProps.put("value.serializer", JsonSerializer.class);
         configProps.put("auto.offset.reset", "earliest");
         configProps.put("group.id", "default");
+        configProps.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
         return new DefaultKafkaProducerFactory<>(configProps);
     }
 
