@@ -24,7 +24,7 @@ public class UnzipService {
 
     private static final String LOCAL_DIR = System.getProperty("java.io.tmpdir");
 
-    @KafkaListener(topics = {"filedownloaded"})
+    @KafkaListener(topics = "filedownloaded", groupId = "default")
     public void receive(@Payload RequestWrapper requestWrapper, @Headers MessageHeaders headers) throws IOException {
         String zipFilePath = requestWrapper.getZipFilePath();
         String serviceName = requestWrapper.getServiceName();

@@ -5,6 +5,8 @@ public class RequestWrapper {
     private String zipFilePath;
     private String serviceName;
 
+    RequestWrapper(){}
+
     public RequestWrapper(String zipFilePath, String serviceName) {
         this.zipFilePath = zipFilePath;
         this.serviceName = serviceName;
