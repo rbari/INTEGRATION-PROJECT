@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import sa.kafkalistener.GeneratedServiceDTO;
+import sa.kafkalistener.data.GeneratedServiceDTO;
 import sa.kafkalistener.utils.AppConstants;
 
 @Service
@@ -16,7 +16,7 @@ public class KafkaProducer {
     private KafkaTemplate<String, GeneratedServiceDTO> kafkaTemplate;
 
     public void sendMessage(GeneratedServiceDTO generatedServiceDTO){
-        kafkaTemplate.send("createnewservice", generatedServiceDTO);
+        kafkaTemplate.send(AppConstants.PUSH_TOPIC_NAME, generatedServiceDTO);
         LOGGER.info(String.format("Message sent -> %s", generatedServiceDTO));
     }
 }
