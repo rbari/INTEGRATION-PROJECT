@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
+import sa.kafkalistener.GeneratedServiceDTO;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +29,7 @@ public class KafkaConfig {
         props.put("key.serializer", StringSerializer.class);
         props.put("value.serializer", StringSerializer.class);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, GeneratedServiceDTO.class);
         return new DefaultKafkaConsumerFactory<>(props);
     }
 
