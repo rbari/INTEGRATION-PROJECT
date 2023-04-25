@@ -3,6 +3,9 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/FileUploadApi/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/FileUploadApi/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/KafkaListener/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/dsgs-listen/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/listener/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/zipService/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/zipService/src/main/resources" charset="UTF-8" />
   </component>

@@ -2,18 +2,27 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
       <profile name="Maven default annotation processors profile" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="KafkaListener" />
         <module name="zipService" />
         <module name="FileUploadApi" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="dsgs-listen" target="17" />
+      <module name="listener" target="11" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="FileUploadApi" options="-parameters" />
+      <module name="KafkaListener" options="-parameters" />
+      <module name="dsgs-listen" options="-parameters" />
+      <module name="listener" options="-parameters" />
       <module name="zipService" options="-parameters" />
     </option>
   </component>
