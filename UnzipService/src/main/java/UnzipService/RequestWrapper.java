@@ -1,17 +1,20 @@
 package UnzipService;
 
 import java.io.Serializable;
+import java.util.Set;
 
 public class RequestWrapper implements Serializable {
 
     private String zipFilePath;
     private String serviceName;
+    private Set<String> topics;
 
     RequestWrapper(){}
 
-    public RequestWrapper(String zipFilePath, String serviceName) {
+    public RequestWrapper(String zipFilePath, String serviceName, Set<String> topics ) {
         this.zipFilePath = zipFilePath;
         this.serviceName = serviceName;
+        this.topics = topics;
     }
 
     public String getZipFilePath() {
@@ -22,11 +25,16 @@ public class RequestWrapper implements Serializable {
         return serviceName;
     }
 
+    public Set<String> getTopics() {
+        return topics;
+    }
+
     @Override
     public String toString() {
         return "RequestWrapper{" +
                 "zipFilePath='" + zipFilePath + '\'' +
                 ", serviceName='" + serviceName + '\'' +
+                ", topics=" + topics +
                 '}';
     }
 }

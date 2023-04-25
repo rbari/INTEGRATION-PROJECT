@@ -9,6 +9,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.util.Set;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -28,6 +29,7 @@ public class UnzipService {
     public void receive(@Payload RequestWrapper requestWrapper, @Headers MessageHeaders headers) throws IOException {
         String zipFilePath = requestWrapper.getZipFilePath();
         String serviceName = requestWrapper.getServiceName();
+        Set<String> topics = requestWrapper.getTopics();
         byte[] file = null;
 
         try {
@@ -38,7 +40,7 @@ public class UnzipService {
 
         if(file != null){
             String unzipPath = unzip(file);
-            RequestWrapper responseWrapper = new RequestWrapper(unzipPath,serviceName);
+            RequestWrapper responseWrapper = new RequestWrapper(unzipPath,serviceName,topics);
             System.out.println("sending to kafka "+ responseWrapper );
             sender.send("fileunziped",responseWrapper);
         }else{
