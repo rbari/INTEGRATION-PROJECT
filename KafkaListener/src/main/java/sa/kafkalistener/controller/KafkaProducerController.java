@@ -1,12 +1,15 @@
 package sa.kafkalistener.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import sa.kafkalistener.data.CreateServiceData;
 import sa.kafkalistener.data.GeneratedServiceDTO;
 import sa.kafkalistener.producer.KafkaProducer;
+import sa.kafkalistener.utils.AppConstants;
 
 import java.util.Collections;
 
@@ -19,8 +22,9 @@ public class KafkaProducerController {
 
 
     @GetMapping("/publish")
-    public ResponseEntity<String> publish(){
-        kafkaProducer.sendMessage(new GeneratedServiceDTO("hello", Collections.emptySet()));
+    public ResponseEntity<String> publish() throws JsonProcessingException {
+        kafkaProducer.sendMessage(new CreateServiceData("DS", 5),
+                AppConstants.DSGS_CREATION);
         return ResponseEntity.ok("Message sent to kafka topic");
     }
 
