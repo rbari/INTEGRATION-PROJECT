@@ -22,10 +22,6 @@ public class ZipController {
 
 	@Autowired
 	ZipClient zipClient;
-	@Autowired
-	private Sender sender;
-//	@Autowired
-//	private ZipClient zipClient;
 	
     @GetMapping(value = "/zip", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public ResponseEntity<Resource> downloadZip(@RequestParam String serviceName ) {
@@ -46,11 +42,5 @@ public class ZipController {
         }
     }
     
-//    public String holamundo(String serviceName) {
-//    	RequestWrapper rWrapper = new RequestWrapper("hola","hola");
-//    	System.out.println("hi world");
-////    	  sender.send("hola mundo", rWrapper);
-//    	return "hola mundo";
-//    }
 
 }
