@@ -1,5 +1,7 @@
 package com.miu.sa.mvnservice;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.miu.sa.mvnservice.config.RequestWrapper;
 import org.apache.maven.shared.invoker.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,8 +9,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.List;
+import java.io.IOException;
+import java.util.*;
 
 @Service
 public class KafkaListener {
@@ -20,10 +22,61 @@ public class KafkaListener {
 
     private String mvnHome;
 
+    //Save
+    List<ServiceDetails> serviceDetails = new ArrayList<>();
+
+    @org.springframework.kafka.annotation.KafkaListener(topics = "DSGS_START_SERVICE", groupId = "default")
+    public void listenToStartService(String serviceName) {
+        Process process = null;
+        try {
+            int port = getPortNumber(serviceName);
+            if (port != 0) {
+                String startCommand = "curl -X POST http://localhost:" + port + "/data-input/start";
+                process = Runtime.getRuntime().exec(startCommand);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            Objects.requireNonNull(process).destroy();
+        }
+    }
+
+    @org.springframework.kafka.annotation.KafkaListener(topics = "DSGS_STOP_SERVICE", groupId = "default")
+    public void listenToStopService(String serviceName) {
+        Process process = null;
+        try {
+            int port = getPortNumber(serviceName);
+            if (port != 0) {
+                String stopCommand = "curl -X POST http://localhost:" + port + "/data-input/stop";
+                process = Runtime.getRuntime().exec(stopCommand);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            Objects.requireNonNull(process).destroy();
+        }
+    }
+
+    private int getPortNumber(String serviceName) {
+        Optional<Integer> first = serviceDetails.stream()
+                .filter(services -> services.getServiceName().equals(serviceName))
+                .map(ServiceDetails::getPort).findFirst();
+
+        return first.orElse(0);
+    }
+
+
     @org.springframework.kafka.annotation.KafkaListener(topics = "fileunziped", groupId = "default")
-    public void listenForDeployment(RequestWrapper requestWrapper) {
-        System.out.println(requestWrapper);
-        executeMvn(requestWrapper);
+    public void listenForDeployment(String message) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            RequestWrapper requestWrapper = mapper.readValue(message, RequestWrapper.class);
+
+            System.out.println(requestWrapper);
+            executeMvn(requestWrapper);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void executeMvn(RequestWrapper requestWrapper) {
@@ -49,7 +102,8 @@ public class KafkaListener {
             request.setMavenHome(new File(mvnHome));
             request.setBatchMode(false);
 
-            request.setOutputHandler(s -> {});
+            request.setOutputHandler(s -> {
+            });
 
             Invoker invoker = new DefaultInvoker();
             new Thread(() -> {
@@ -62,10 +116,10 @@ public class KafkaListener {
                     e.printStackTrace();
                 }
             }).start();
+            serviceDetails.add(new ServiceDetails(serviceName, p));
             System.out.println("Service: " + serviceName + " running in port: " + p);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
-
 }

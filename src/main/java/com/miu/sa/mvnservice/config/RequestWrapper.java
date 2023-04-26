@@ -9,8 +9,7 @@ public class RequestWrapper implements Serializable {
     private String serviceName;
     private Set<String> topics;
 
-    public RequestWrapper() {
-    }
+    public RequestWrapper() {}
 
     public RequestWrapper(String zipFilePath, String serviceName, Set<String> topics) {
         this.zipFilePath = zipFilePath;
