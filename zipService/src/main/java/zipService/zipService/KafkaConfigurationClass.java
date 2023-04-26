@@ -25,8 +25,8 @@ public class KafkaConfigurationClass {
         props.put("security.protocol", "SASL_SSL");
         props.put("sasl.jaas.config", "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"YWxlcnQtY3JpY2tldC02MjkwJI15DGb5T9i8SGIlnrntnj4LLY2sHmqBwcEfq14\" password=\"81ddca5211414c998e0f8ccf75ebe491\";");
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "default");
-        props.put("key.serializer", StringSerializer.class);
-        props.put("value.serializer", JsonSerializer.class);
+//        props.put("key.serializer", StringSerializer.class);
+//        props.put("value.serializer", JsonSerializer.class);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
 
@@ -47,8 +47,8 @@ public class KafkaConfigurationClass {
         configProps.put("sasl.mechanism", "SCRAM-SHA-256");
         configProps.put("security.protocol", "SASL_SSL");
         configProps.put("sasl.jaas.config", "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"YWxlcnQtY3JpY2tldC02MjkwJI15DGb5T9i8SGIlnrntnj4LLY2sHmqBwcEfq14\" password=\"81ddca5211414c998e0f8ccf75ebe491\";");
-        configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        configProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+//        configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+//        configProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         configProps.put("key.serializer", StringSerializer.class);
         configProps.put("value.serializer", JsonSerializer.class);
         configProps.put("auto.offset.reset", "earliest");

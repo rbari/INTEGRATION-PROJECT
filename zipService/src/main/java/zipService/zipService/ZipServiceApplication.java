@@ -10,7 +10,7 @@ import org.springframework.kafka.annotation.EnableKafka;
 @SpringBootApplication
 @EnableFeignClients
 @EnableKafka
-public class ZipServiceApplication implements CommandLineRunner{
+public class ZipServiceApplication {
 	
 	
 	
@@ -22,12 +22,12 @@ public class ZipServiceApplication implements CommandLineRunner{
 	
 	}
 	
-	@Autowired
-	private Sender sender;
-	@Override
-	public void run(String... strings) throws Exception {
-		RequestWrapper rq = new RequestWrapper("najkaj", "najkaj");
-		sender.send("filedownloaded", rq);
-	}
+//	@Autowired
+//	private Sender sender;
+//	@Override
+//	public void run(String... strings) throws Exception {
+//		RequestWrapper rq = new RequestWrapper("najkaj", "najkaj");
+//		sender.send("tester", rq);
+//	}
 
 }

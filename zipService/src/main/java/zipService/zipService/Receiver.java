@@ -11,10 +11,11 @@ public class Receiver {
 	@Autowired
 	ZipController zipController;
 	
-	@KafkaListener(topics = "filedownloaded", groupId = "default")
+	@KafkaListener(topics = "tester", groupId = "default")
 	public void receive(@Payload String serviceName,
 	@Headers MessageHeaders headers) {
-		zipController.downloadZip(serviceName);
+//		zipController.downloadZip(serviceName);
+		zipController.holamundo(serviceName);
 		
 	}
 

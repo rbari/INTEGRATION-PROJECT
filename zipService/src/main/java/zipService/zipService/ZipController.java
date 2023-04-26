@@ -52,4 +52,12 @@ public class ZipController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+    
+    public String holamundo(String serviceName) {
+    	RequestWrapper rWrapper = new RequestWrapper("hola","hola");
+    	  sender.send("hola mundo", rWrapper);
+    	  System.out.println("hi world");
+    	return "hola mundo";
+    }
+
 }
