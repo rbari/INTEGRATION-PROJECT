@@ -20,6 +20,6 @@ public class KafkaProducer {
 
         String jsonInString = mapper.writeValueAsString(data);
         kafkaTemplate.send(topic, jsonInString);
-        LOGGER.info(String.format("Message sent -> %s", jsonInString));
+//        LOGGER.info(String.format("Message sent -> %s", jsonInString));
     }
 }
