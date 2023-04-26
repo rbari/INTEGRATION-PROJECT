@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import sa.kafkalistener.data.CreateServiceData;
-import sa.kafkalistener.data.GeneratedServiceDTO;
+import sa.kafkalistener.data.ServiceRunningData;
 import sa.kafkalistener.producer.KafkaProducer;
 import sa.kafkalistener.utils.AppConstants;
 
@@ -31,13 +31,14 @@ public class KafKaConsumer {
 
     @KafkaListener(topics = AppConstants.CS_START_SERVICE, groupId = AppConstants.GROUP_ID)
     public void startService(String message) throws JsonProcessingException {
-        LOGGER.info(String.format("Message received -> %s", message));
-        kafkaProducer.sendMessage(message, AppConstants.DSGS_START_SERVICE);
-    }
+        ObjectMapper mapper = new ObjectMapper();
+        ServiceRunningData serviceRunningData = mapper.readValue(message, ServiceRunningData.class);
+        LOGGER.info(String.format("Message received -> %s", serviceRunningData));
 
-    @KafkaListener(topics = AppConstants.CS_STOP_SERVICE, groupId = AppConstants.GROUP_ID)
-    public void stopService(String message) throws JsonProcessingException {
-        LOGGER.info(String.format("Message received -> %s", message));
-        kafkaProducer.sendMessage(message, AppConstants.DSGS_STOP_SERVICE);
+        if (serviceRunningData.getServiceStatus().equals("START")){
+            kafkaProducer.sendMessage(serviceRunningData, AppConstants.DSGS_START_SERVICE);
+        }else {
+            kafkaProducer.sendMessage(serviceRunningData, AppConstants.DSGS_STOP_SERVICE);
+        }
     }
 }
