@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@Service
-public class Sender {
+//@Service
+public class Sender2 {
     @Autowired
    private KafkaTemplate<String, Object> kafkaTemplate;
 //	@Autowired

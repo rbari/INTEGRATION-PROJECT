@@ -12,6 +12,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(value="css-client",url="http://localhost:8080")
 public interface ZipClient {
 	 @GetMapping(value = "/download/{filename}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-	  Resource downloadFile(@RequestParam("service-name") String serviceName);
+	  Resource downloadFile(@RequestParam String serviceName);
 	
 }

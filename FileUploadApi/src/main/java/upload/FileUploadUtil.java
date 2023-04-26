@@ -20,7 +20,7 @@ public class FileUploadUtil {
             Files.createDirectories(uploadPath);
         }
  
-        String fileCode = "najkaj";
+        String fileCode = "?service-name=SS-14-15";
          
         try (InputStream inputStream = multipartFile.getInputStream()) {
             Path filePath = uploadPath.resolve(fileCode + "-" + fileName);
