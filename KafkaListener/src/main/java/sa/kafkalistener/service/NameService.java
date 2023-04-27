@@ -36,7 +36,9 @@ public class NameService {
         generateAndCreateSS(cds);
         generateAndCreateRs(cds);
 
-        createdCDSTopics.add(cds);
+        if(!isCDSExist(cds))
+            createdCDSTopics.add(cds);
+
     }
 
     public void startServices(ServiceRunningData serviceRunningData) throws Exception {
@@ -45,21 +47,53 @@ public class NameService {
         generateAndStartSS(cds);
         generateAndStartRs(cds);
 
-        runningCDSTopics.add(cds);
+        if(!isCDSRunning(cds)) {
+            runningCDSTopics.add(cds);
+        }
+    }
+
+    public void stopServices(ServiceRunningData serviceRunningData) throws Exception {
+        String ds = serviceRunningData.getServiceName();
+        String cds = generateCDS(ds);
+
+        System.out.println(cds);
+        System.out.println(runningCDSTopics);
+
+        boolean changed = false;
+        if(isCDSRunning(cds)) {
+            runningCDSTopics.remove(cds);
+            changed = true;
+        }
+
+        Set<String> ss = generateSSForStartStop(cds, runningCDSTopics);
+        Set<String> rs = generateRsForStartStop(cds, runningCDSTopics);
+
+        if(changed)
+            runningCDSTopics.add(cds);
+
+        stopRS(rs);
+        stopSS(ss);
+        stopCDS(cds);
+        stopDS(ds);
     }
 
     private String generateAndStartDs(String ds) throws Exception {
         if(!isDSExist(ds))
             throw new Exception();
 
-        sendToStartKafka(ds);
-        runningDSTopics.add(ds);
+        if(!isDSRunning(ds)) {
+            sendToStartKafka(ds);
+            runningDSTopics.add(ds);
+        }
+
         return ds;
     }
 
     private String generateAndCreateDS(String ds, long interval) throws JsonProcessingException {
-        sendToCreationKafka(new CreateServiceResponse("DS", interval, Set.of(ds)));
-        createdDSTopics.add(ds);
+        if(!isDSExist(ds)) {
+            sendToCreationKafka(new CreateServiceResponse("DS", interval, Set.of(ds)));
+            createdDSTopics.add(ds);
+        }
         return ds;
     }
 
@@ -68,14 +102,20 @@ public class NameService {
         if(!isCDSExist(cds))
             throw new Exception();
 
-        sendToStartKafka(cds);
+        if(!isCDSRunning(cds)) {
+            sendToStartKafka(cds);
+        }
+
 
         return cds;
     }
 
     private String generateAndCreateCDS(String ds) throws JsonProcessingException {
         String cds = generateCDS(ds);
-        sendToCreationKafka(new CreateServiceResponse("CDS", 0, Set.of(cds)));
+        if(!isCDSExist(cds)) {
+            sendToCreationKafka(new CreateServiceResponse("CDS", 0, Set.of(cds)));
+        }
+
         return cds;
     }
 
@@ -87,26 +127,36 @@ public class NameService {
     private void generateAndStartSS(String newCds) throws Exception {
         Set<String> ssSet = generateSSForStartStop(newCds, runningCDSTopics);
         for (String ss : ssSet) {
-            sendToStartKafka(ss);
+            if(!isSSRunning(ss)) {
+                sendToStartKafka(ss);
+                runningSSTopics.add(ss);
+            }
+
         }
 
-        runningSSTopics.addAll(ssSet);
+//        runningSSTopics.addAll(ssSet);
     }
 
     private void generateAndCreateSS(String newCds) throws JsonProcessingException {
         Set<String> ssSet = generateSS(newCds, createdCDSTopics);
         for (String ss : ssSet) {
-            sendToCreationKafka(new CreateServiceResponse("SS", 0, Set.of(ss)));
+            if(!isSSExist(ss)){
+                sendToCreationKafka(new CreateServiceResponse("SS", 0, Set.of(ss)));
+                createdSSTopics.add(ss);
+            }
         }
 
-        createdSSTopics.addAll(ssSet);
+//        createdSSTopics.addAll(ssSet);
     }
 
-    private Set<String> generateSS(String newCds, Set<String> CDSs) throws JsonProcessingException {
+    private Set<String> generateSS(String newCds, Set<String> CDSs) {
 
         Set<String> ssSet = new HashSet<>();
             for (String s : CDSs) {
-                ssSet.add("SS" + s.substring(s.lastIndexOf("_")) + newCds.substring(newCds.lastIndexOf("_")));
+                String first = s.substring(s.lastIndexOf("_"));
+                String second = newCds.substring(newCds.lastIndexOf("_"));
+                if (!first.equals(second))
+                    ssSet.add("SS" + first + second);
             }
 
         return ssSet;
@@ -134,18 +184,24 @@ public class NameService {
         Set<String> rsSet = generateRsForStartStop(newCds, runningCDSTopics);
 
         for (String rs : rsSet) {
-            sendToStartKafka(rs);
+            if(!isRSRunning(rs)) {
+                sendToStartKafka(rs);
+                runningRSTopics.add(rs);
+            }
+
         }
-        runningRSTopics.addAll(rsSet);
+//        runningRSTopics.addAll(rsSet);
     }
 
     private void generateAndCreateRs(String newCds) throws JsonProcessingException {
         Set<String> rsSet = generateRs(newCds, createdCDSTopics);
         for (String rs : rsSet) {
-            sendToCreationKafka(new CreateServiceResponse("RS", 0, Set.of(rs)));
+            if(!isRSExist(rs)) {
+                sendToCreationKafka(new CreateServiceResponse("RS", 0, Set.of(rs)));
+                createdRSTopics.add(rs);
+            }
         }
-
-        createdRSTopics.addAll(rsSet);
+//        createdRSTopics.addAll(rsSet);
     }
 
     private Set<String> generateRsForStartStop(String newCds, Set<String> CDSs) throws Exception {
@@ -170,7 +226,10 @@ public class NameService {
         Set<String> rsNames = new HashSet<>();
 
         for (String s : CDSs) {
-            rsNames.add("RS" + s.substring(s.lastIndexOf("_")) + newCds.substring(newCds.lastIndexOf("_")));
+            String first = s.substring(s.lastIndexOf("_"));
+            String second = newCds.substring(newCds.lastIndexOf("_"));
+            if (!first.equals(second))
+                rsNames.add("RS" + first + second);
         }
 
         return rsNames;
@@ -192,6 +251,37 @@ public class NameService {
         kafkaProducer.sendMessage(name, AppConstants.DSGS_STOP_SERVICE);
     }
 
+    private void stopDS(String ds) throws JsonProcessingException {
+        if(isDSRunning(ds)) {
+            sendToStopKafka(ds);
+            runningDSTopics.remove(ds);
+        }
+    }
+
+    private void stopCDS(String cds) throws JsonProcessingException {
+        if(isCDSRunning(cds)) {
+            sendToStopKafka(cds);
+        }
+    }
+
+    private void stopSS(Set<String> ss) throws JsonProcessingException {
+        for(String s : ss) {
+            if(isSSRunning(s)) {
+                sendToStopKafka(s);
+                runningSSTopics.remove(s);
+            }
+        }
+    }
+
+    private void stopRS(Set<String> rs) throws JsonProcessingException {
+        for(String r: rs) {
+            if(isRSRunning(r)) {
+                sendToStopKafka(r);
+                runningRSTopics.remove(r);
+            }
+        }
+    }
+
     private boolean isDSExist(String ds) {
         return createdDSTopics.contains(ds);
     }
@@ -206,5 +296,21 @@ public class NameService {
 
     private boolean isRSExist(String rs) {
         return createdRSTopics.contains(rs);
+    }
+
+    private boolean isDSRunning(String ds) {
+        return runningDSTopics.contains(ds);
+    }
+
+    private boolean isCDSRunning(String cds) {
+        return runningCDSTopics.contains(cds);
+    }
+
+    private boolean isSSRunning(String ss) {
+        return runningSSTopics.contains(ss);
+    }
+
+    private boolean isRSRunning(String rs) {
+        return runningRSTopics.contains(rs);
     }
 }

@@ -41,7 +41,7 @@ public class KafKaConsumer {
         if (serviceRunningData.getServiceStatus().equals("START")){
             nameService.startServices(serviceRunningData);
         }else {
-            kafkaProducer.sendMessage(serviceRunningData, AppConstants.DSGS_STOP_SERVICE);
+            nameService.stopServices(serviceRunningData);
         }
     }
 }
