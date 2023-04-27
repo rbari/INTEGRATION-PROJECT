@@ -21,13 +21,13 @@ public class KafkaConfig {
     public ConsumerFactory<String, Object> consumerFactory() {
         Map<String, Object> props = new HashMap<>();
 
-        props.put("bootstrap.servers", "tough-liger-11043-us1-kafka.upstash.io:9092");
+        props.put("bootstrap.servers", "alert-cricket-6290-us1-kafka.upstash.io:9092");
         props.put("sasl.mechanism", "SCRAM-SHA-256");
         props.put("security.protocol", "SASL_SSL");
-        props.put("spring.kafka.consumer.enable-auto-commit", "true");
-        props.put("sasl.jaas.config", "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"dG91Z2gtbGlnZXItMTEwNDMkmE224RVY_bQB1KaQZPwSOJXXxekhHp3KIyrbTzo\" password=\"259e361a4eb64688ac6a31fa8cca8f7f\";");
+        props.put("auto.offset.reset", "earliest");//earliest //default //none
+//        props.put("spring.kafka.consumer.enable-auto-commit", "true");
+        props.put("sasl.jaas.config", "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"YWxlcnQtY3JpY2tldC02MjkwJI15DGb5T9i8SGIlnrntnj4LLY2sHmqBwcEfq14\" password=\"81ddca5211414c998e0f8ccf75ebe491\";");
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "default");
-        props.put("auto.offset.reset", "latest");
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 

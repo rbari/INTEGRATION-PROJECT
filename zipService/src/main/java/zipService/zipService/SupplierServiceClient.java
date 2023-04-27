@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(name = "Code-Supplier-Service", url="http://localhost:8086/api/v1/sources")
+@FeignClient(name = "Code-Supplier-Service", url="http://192.168.137.15:8085/api/v1/sources")
 public interface SupplierServiceClient {
 	@GetMapping(value = "/cds", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
 	ResponseEntity<Resource> getCDSCode(@RequestParam("topics") String topics);
