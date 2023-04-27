@@ -12,7 +12,7 @@ public interface SupplierServiceClient {
 	@GetMapping(value = "/cds", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
 	ResponseEntity<Resource> getCDSCode(@RequestParam("topics") String topics);
 
-	@GetMapping(value = "/ss", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+	@GetMapping(value = "/ss")
 	ResponseEntity<Resource> getSSCode(@RequestParam("topics") String topics);
 
 	@GetMapping(value = "/rs", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)

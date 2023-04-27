@@ -8,74 +8,75 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.util.Set;
-
 
 
 @Service
 public class Receiver {
 
-	@Autowired
-	Sender sender;
+    @Autowired
+    Sender sender;
 
-	@Autowired
-	SupplierServiceClient supplierServiceClient;
-	
-	@KafkaListener(topics = "DSGS_CREATION", groupId = "default")
-	public void receive(String message){
-		  try {
+    @Autowired
+    SupplierServiceClient supplierServiceClient;
 
-			  ObjectMapper mapper = new ObjectMapper();
-			  System.out.println("got a message from client: "+ message);
+    @KafkaListener(topics = "DSGS_CREATION", groupId = "default")
+    public void receive(String message) {
+        try {
 
-			  //converting the message to an object
-			  InputMessageWrapper inputMessageWrapper = mapper.readValue(message, InputMessageWrapper.class);
+            ObjectMapper mapper = new ObjectMapper();
+            System.out.println("got a message from client: " + message);
 
-			  String serviceName = inputMessageWrapper.getServiceName();
-			  Set<String> topics = inputMessageWrapper.getTopics();
-			  String interval = inputMessageWrapper.getInterval();
+            //converting the message to an object
+            InputMessageWrapper inputMessageWrapper = mapper.readValue(message, InputMessageWrapper.class);
 
-			  // receiving file from css
-			  byte[] zipFile = getSourceCode(serviceName,topics,interval);
+            String serviceName = inputMessageWrapper.getServiceName();
+            Set<String> topics = inputMessageWrapper.getTopics();
+            String interval = inputMessageWrapper.getInterval();
+
+            // receiving file from css
+            byte[] zipFile = getSourceCode(serviceName, topics, interval);
 
 //			  System.out.println("zipFile: "+zipFile);
 
-			  // sending message to unzip service
-			  RequestWrapper requestWrapper = new RequestWrapper(zipFile, serviceName, topics);
-			  System.out.println("sending to kafka "+ requestWrapper );
+            // sending message to unzip service
+            RequestWrapper requestWrapper = new RequestWrapper(zipFile, serviceName, topics);
+            System.out.println("sending to kafka " + requestWrapper);
 
-			  // convert file to string before sending to kafka
-			  String jsonInString = mapper.writeValueAsString(requestWrapper);
-			  sender.send("filedownloaded",jsonInString);
+            // convert file to string before sending to kafka
+            String jsonInString = mapper.writeValueAsString(requestWrapper);
+            sender.send("filedownloaded", jsonInString);
 
-	        } catch (JsonProcessingException e) {
-			  	e.printStackTrace();
-	        }
-	}
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+    }
 
-	public byte[] getSourceCode(String serviceName, Set<String> topics, String interval) {
-		byte[] output = null;
-		try {
-			switch (serviceName.toLowerCase()){
-				case "cds":
-					output = supplierServiceClient.getCDSCode(String.join(",", topics)).getBody().getInputStream().readAllBytes();
-					break;
-				case "ss":
-					output = supplierServiceClient.getSSCode(String.join(",", topics)).getBody().getInputStream().readAllBytes();
-					break;
-				case "rs":
-					output = supplierServiceClient.getRSCode().getBody().getInputStream().readAllBytes();
-					break;
-				case "dis":
-					output = supplierServiceClient.getDIRCode(String.join(",", topics),interval).getBody().getInputStream().readAllBytes();
-					break;
-			}
+    public byte[] getSourceCode(String serviceName, Set<String> topics, String interval) {
+        byte[] output = null;
+        try {
+            switch (serviceName.toLowerCase()) {
+                case "cds":
+                    output = supplierServiceClient.getCDSCode(String.join(",", topics)).getBody().getInputStream().readAllBytes();
+                    break;
+                case "ss":
+                    String joinString = URLDecoder.decode(String.join("-", topics), "UTF-8");
+                    output = supplierServiceClient.getSSCode(joinString).getBody().getInputStream().readAllBytes();
+                    break;
+                case "rs":
+                    output = supplierServiceClient.getRSCode().getBody().getInputStream().readAllBytes();
+                    break;
+                case "dis":
+                    output = supplierServiceClient.getDIRCode(String.join(",", topics), interval).getBody().getInputStream().readAllBytes();
+                    break;
+            }
 
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return output;
-	}
-		  
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return output;
+    }
+
 }
-	  
+
