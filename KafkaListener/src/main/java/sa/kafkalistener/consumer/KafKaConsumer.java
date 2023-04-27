@@ -9,9 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import sa.kafkalistener.data.CreateServiceData;
-
 import sa.kafkalistener.data.ServiceRunningData;
-
 import sa.kafkalistener.producer.KafkaProducer;
 import sa.kafkalistener.service.NameService;
 import sa.kafkalistener.utils.AppConstants;
@@ -26,13 +24,12 @@ public class KafKaConsumer {
     @Autowired
     private NameService nameService;
 
-    @KafkaListener(topics = AppConstants.CS_CREATION,
-            groupId = AppConstants.GROUP_ID)
+    @KafkaListener(topics = AppConstants.CS_CREATION, groupId = AppConstants.GROUP_ID)
     public void createService(String message) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         CreateServiceData createServiceData = mapper.readValue(message, CreateServiceData.class);
+        LOGGER.info(String.format("Message received -> %s", createServiceData));
         nameService.generateNames(createServiceData);
-//        LOGGER.info(String.format("Message received -> %s", createServiceData));
     }
 
     @KafkaListener(topics = AppConstants.CS_START_SERVICE, groupId = AppConstants.GROUP_ID)
@@ -43,7 +40,6 @@ public class KafKaConsumer {
 
         if (serviceRunningData.getServiceStatus().equals("START")){
             nameService.startServices(serviceRunningData);
-//            kafkaProducer.sendMessage(serviceRunningData, AppConstants.DSGS_START_SERVICE);
         }else {
             kafkaProducer.sendMessage(serviceRunningData, AppConstants.DSGS_STOP_SERVICE);
         }

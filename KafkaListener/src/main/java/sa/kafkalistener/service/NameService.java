@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sa.kafkalistener.consumer.KafKaConsumer;
 import sa.kafkalistener.data.CreateServiceData;
+import sa.kafkalistener.data.CreateServiceResponse;
 import sa.kafkalistener.data.ServiceRunningData;
 import sa.kafkalistener.producer.KafkaProducer;
 import sa.kafkalistener.utils.AppConstants;
@@ -30,9 +31,9 @@ public class NameService {
     public void generateNames(CreateServiceData createServiceData) throws JsonProcessingException {
         String ds = createServiceData.getTopicName();
 
-        String cds = generateAndCreateCDS(ds);
-        generateAndCreateSS(cds);
-        generateAndCreateRs(cds);
+        String cds = generateAndCreateCDS(createServiceData);
+        generateAndCreateSS(createServiceData);
+        generateAndCreateRs(createServiceData);
 
         createdCDSTopics.add(cds);
     }
@@ -55,13 +56,17 @@ public class NameService {
         return cds;
     }
 
-    private String generateAndCreateCDS(String ds) throws JsonProcessingException {
-        String cds = generateCDS(ds);
-        sendToCreationKafka(cds);
+    private String generateAndCreateCDS(CreateServiceData createServiceData) throws JsonProcessingException {
+        String cds = generateCDS(createServiceData.getTopicName());
+        CreateServiceResponse createServiceResponse = new CreateServiceResponse();
+        createServiceResponse.setServiceName("CDS");
+        createServiceResponse.setTopics(Set.of(cds));
+        createServiceResponse.setInterval(0);
+        sendToCreationKafka(createServiceResponse);
         return cds;
     }
 
-    private String generateCDS(String ds) throws JsonProcessingException {
+    private String generateCDS(String ds) {
         return "CDS" + ds.substring(ds.lastIndexOf("_"));
     }
 
@@ -77,15 +82,15 @@ public class NameService {
         return ssSet;
     }
 
-    private Set<String> generateAndCreateSS(String newCds) throws JsonProcessingException {
-        Set<String> ssSet = generateSS(newCds, createdCDSTopics);
-        for (String ss : ssSet) {
-            sendToCreationKafka(ss);
-        }
+    private void generateAndCreateSS(CreateServiceData createServiceData) throws JsonProcessingException {
+        Set<String> ssSet = generateSS(createServiceData.getTopicName(), createdCDSTopics);
+        CreateServiceResponse createServiceResponse = new CreateServiceResponse();
+        createServiceResponse.setServiceName("SS");
+        createServiceResponse.setTopics(ssSet);
+        createServiceResponse.setInterval(0);
+        sendToCreationKafka(createServiceResponse);
 
         createdSSTopics.addAll(ssSet);
-
-        return ssSet;
     }
 
     private Set<String> generateSS(String newCds, Set<String> CDSs) throws JsonProcessingException {
@@ -125,13 +130,13 @@ public class NameService {
         return rsSet;
     }
 
-    private Set<String> generateAndCreateRs(String newCds) throws JsonProcessingException {
-        Set<String> rsSet = generateRs(newCds, createdCDSTopics);
-
-        for (String rs : rsSet) {
-            sendToCreationKafka(rs);
-        }
-        createdRSTopics.addAll(rsSet);
+    private Set<String> generateAndCreateRs(CreateServiceData createServiceData) throws JsonProcessingException {
+        Set<String> rsSet = generateRs(createServiceData.getTopicName(), createdCDSTopics);
+        CreateServiceResponse createServiceResponse = new CreateServiceResponse();
+        createServiceResponse.setServiceName("RS");
+        createServiceResponse.setTopics(rsSet);
+        createServiceResponse.setInterval(0);
+        sendToCreationKafka(createServiceResponse);
 
         return rsSet;
     }
@@ -163,9 +168,9 @@ public class NameService {
     }
 
 
-    private void sendToCreationKafka(String name) throws JsonProcessingException {
-        LOGGER.info(String.format("Message sent -> %s to %s", name, AppConstants.DSGS_CREATION));
-        kafkaProducer.sendMessage(name, AppConstants.DSGS_CREATION);
+    private void sendToCreationKafka(CreateServiceResponse createServiceResponse) throws JsonProcessingException {
+        LOGGER.info(String.format("Message sent -> %s to %s", createServiceResponse, AppConstants.DSGS_CREATION));
+        kafkaProducer.sendMessage(createServiceResponse, AppConstants.DSGS_CREATION);
     }
 
     private void sendToStartKafka(String name) throws JsonProcessingException {
