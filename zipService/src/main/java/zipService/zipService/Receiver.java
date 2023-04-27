@@ -67,7 +67,7 @@ public class Receiver {
                 case "rs":
                     output = supplierServiceClient.getRSCode().getBody().getInputStream().readAllBytes();
                     break;
-                case "dis":
+                case "ds":
                     output = supplierServiceClient.getDIRCode(String.join(",", topics), interval).getBody().getInputStream().readAllBytes();
                     break;
             }
