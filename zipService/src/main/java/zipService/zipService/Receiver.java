@@ -1,12 +1,11 @@
 package zipService.zipService;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.Set;
@@ -57,7 +56,7 @@ public class Receiver {
 	public byte[] getSourceCode(String serviceName, Set<String> topics, String interval) {
 		byte[] output = null;
 		try {
-			switch (serviceName){
+			switch (serviceName.toLowerCase()){
 				case "cds":
 					output = supplierServiceClient.getCDSCode(String.join(",", topics)).getBody().getInputStream().readAllBytes();
 					break;
