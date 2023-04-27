@@ -139,9 +139,12 @@ public class NameService {
 
     private void generateAndCreateSS(String newCds) throws JsonProcessingException {
         Set<String> ssSet = generateSS(newCds, createdCDSTopics);
+        if(!ssSet.isEmpty()) {
+            sendToCreationKafka(new CreateServiceResponse("SS", String.valueOf(0), ssSet));
+        }
         for (String ss : ssSet) {
             if(!isSSExist(ss)){
-                sendToCreationKafka(new CreateServiceResponse("SS", String.valueOf(0), Set.of(ss)));
+//                sendToCreationKafka(new CreateServiceResponse("SS", String.valueOf(0), Set.of(ss)));
                 createdSSTopics.add(ss);
             }
         }
@@ -156,7 +159,10 @@ public class NameService {
                 String first = s.substring(s.lastIndexOf("_"));
                 String second = newCds.substring(newCds.lastIndexOf("_"));
                 if (!first.equals(second))
-                    ssSet.add("SS" + first + second);
+                    ssSet.add("SS" + first);
+                    ssSet.add("SS" + second);
+
+//                    ssSet.add("SS" + first + second);
             }
 
         return ssSet;
