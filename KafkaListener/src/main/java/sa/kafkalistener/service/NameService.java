@@ -91,7 +91,7 @@ public class NameService {
 
     private String generateAndCreateDS(String ds, long interval) throws JsonProcessingException {
         if(!isDSExist(ds)) {
-            sendToCreationKafka(new CreateServiceResponse("DS", interval, Set.of(ds)));
+            sendToCreationKafka(new CreateServiceResponse("DS", String.valueOf(interval), Set.of(ds)));
             createdDSTopics.add(ds);
         }
         return ds;
@@ -113,7 +113,7 @@ public class NameService {
     private String generateAndCreateCDS(String ds) throws JsonProcessingException {
         String cds = generateCDS(ds);
         if(!isCDSExist(cds)) {
-            sendToCreationKafka(new CreateServiceResponse("CDS", 0, Set.of(cds)));
+            sendToCreationKafka(new CreateServiceResponse("CDS", String.valueOf(0), Set.of(cds)));
         }
 
         return cds;
@@ -141,7 +141,7 @@ public class NameService {
         Set<String> ssSet = generateSS(newCds, createdCDSTopics);
         for (String ss : ssSet) {
             if(!isSSExist(ss)){
-                sendToCreationKafka(new CreateServiceResponse("SS", 0, Set.of(ss)));
+                sendToCreationKafka(new CreateServiceResponse("SS", String.valueOf(0), Set.of(ss)));
                 createdSSTopics.add(ss);
             }
         }
@@ -197,7 +197,7 @@ public class NameService {
         Set<String> rsSet = generateRs(newCds, createdCDSTopics);
         for (String rs : rsSet) {
             if(!isRSExist(rs)) {
-                sendToCreationKafka(new CreateServiceResponse("RS", 0, Set.of(rs)));
+                sendToCreationKafka(new CreateServiceResponse("RS", String.valueOf(0), Set.of(rs)));
                 createdRSTopics.add(rs);
             }
         }

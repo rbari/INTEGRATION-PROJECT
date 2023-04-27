@@ -11,7 +11,7 @@ import java.util.Set;
 @Data
 public class CreateServiceResponse {
     private String serviceName;
-    private long interval;
+    private String interval;
     private Set<String> topics;
 
 }
