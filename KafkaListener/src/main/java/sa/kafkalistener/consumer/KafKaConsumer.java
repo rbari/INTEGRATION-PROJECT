@@ -33,7 +33,7 @@ public class KafKaConsumer {
     }
 
     @KafkaListener(topics = AppConstants.CS_START_SERVICE, groupId = AppConstants.GROUP_ID)
-    public void startService(String message) throws JsonProcessingException {
+    public void startService(String message) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         ServiceRunningData serviceRunningData = mapper.readValue(message, ServiceRunningData.class);
         LOGGER.info(String.format("Message received -> %s", serviceRunningData));
