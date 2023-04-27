@@ -13,6 +13,7 @@ import sa.kafkalistener.producer.KafkaProducer;
 import sa.kafkalistener.utils.AppConstants;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 @Service
@@ -142,7 +143,7 @@ public class NameService {
         for (Set<String> ss : ssSet) {
             if(!ss.isEmpty()){
                 sendToCreationKafka(new CreateServiceResponse("SS", String.valueOf(0), ss));
-                createdSSTopics.addAll(ss);
+//                createdSSTopics.addAll(ss);
             }
         }
 
@@ -156,12 +157,15 @@ public class NameService {
                 Set<String> newSs = new HashSet<>();
                 String first = s.substring(s.lastIndexOf("_"));
                 String second = newCds.substring(newCds.lastIndexOf("_"));
+                String element = "";
                 if (!first.equals(second))
                 {
                     newSs.add("SS" + first);
                     newSs.add("SS" + second);
+                    element = "SS" + first + second;
                 }
                 ssSet.add(newSs);
+                createdSSTopics.add(element);
             }
 
         return ssSet;
