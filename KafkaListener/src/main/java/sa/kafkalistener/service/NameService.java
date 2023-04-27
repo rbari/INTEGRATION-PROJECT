@@ -13,7 +13,6 @@ import sa.kafkalistener.producer.KafkaProducer;
 import sa.kafkalistener.utils.AppConstants;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 @Service
@@ -160,8 +159,8 @@ public class NameService {
                 String element = "";
                 if (!first.equals(second))
                 {
-                    newSs.add("SS" + first);
-                    newSs.add("SS" + second);
+                    newSs.add("CDS" + first);
+                    newSs.add("CDS" + second);
                     element = "SS" + first + second;
                 }
                 ssSet.add(newSs);
