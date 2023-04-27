@@ -26,9 +26,6 @@ public class NameService {
     private static Set<String> createdRSTopics = new HashSet<>();
 
     private static Set<String> runningDSTopics = new HashSet<>();
-    private static Set<String> runningCDSTopics = new HashSet<>();
-    private static Set<String> runningSSTopics = new HashSet<>();
-    private static Set<String> runningRSTopics = new HashSet<>();
 
     public void generateNames(CreateServiceData createServiceData) throws JsonProcessingException {
         String ds = generateAndCreateDS(createServiceData.getTopicName(), createServiceData.getTopicInterval());
@@ -42,39 +39,11 @@ public class NameService {
     }
 
     public void startServices(ServiceRunningData serviceRunningData) throws Exception {
-        String ds = generateAndStartDs(serviceRunningData.getServiceName());
-        String cds = generateAndStartCDS(ds);
-        generateAndStartSS(cds);
-        generateAndStartRs(cds);
-
-        if(!isCDSRunning(cds)) {
-            runningCDSTopics.add(cds);
-        }
+        generateAndStartDs(serviceRunningData.getServiceName());
     }
 
     public void stopServices(ServiceRunningData serviceRunningData) throws Exception {
-        String ds = serviceRunningData.getServiceName();
-        String cds = generateCDS(ds);
-
-        System.out.println(cds);
-        System.out.println(runningCDSTopics);
-
-        boolean changed = false;
-        if(isCDSRunning(cds)) {
-            runningCDSTopics.remove(cds);
-            changed = true;
-        }
-
-        Set<String> ss = generateSSForStartStop(cds, runningCDSTopics);
-        Set<String> rs = generateRsForStartStop(cds, runningCDSTopics);
-
-        if(changed)
-            runningCDSTopics.add(cds);
-
-        stopRS(rs);
-        stopSS(ss);
-        stopCDS(cds);
-        stopDS(ds);
+        stopDS(serviceRunningData.getServiceName());
     }
 
     private String generateAndStartDs(String ds) throws Exception {
@@ -97,18 +66,6 @@ public class NameService {
         return ds;
     }
 
-    private String generateAndStartCDS(String ds) throws Exception {
-        String cds = generateCDS(ds);
-        if(!isCDSExist(cds))
-            throw new Exception();
-
-        if(!isCDSRunning(cds)) {
-            sendToStartKafka(cds);
-        }
-
-
-        return cds;
-    }
 
     private String generateAndCreateCDS(String ds) throws JsonProcessingException {
         String cds = generateCDS(ds);
@@ -121,20 +78,6 @@ public class NameService {
 
     private String generateCDS(String ds) {
         return "CDS" + ds.substring(ds.lastIndexOf("_"));
-    }
-
-
-    private void generateAndStartSS(String newCds) throws Exception {
-        Set<String> ssSet = generateSSForStartStop(newCds, runningCDSTopics);
-        for (String ss : ssSet) {
-            if(!isSSRunning(ss)) {
-                sendToStartKafka(ss);
-                runningSSTopics.add(ss);
-            }
-
-        }
-
-//        runningSSTopics.addAll(ssSet);
     }
 
     private void generateAndCreateSS(String newCds) throws JsonProcessingException {
@@ -170,37 +113,6 @@ public class NameService {
         return ssSet;
     }
 
-    private Set<String> generateSSForStartStop(String newCds, Set<String> CDSs) throws Exception {
-
-        Set<String> ssSet = new HashSet<>();
-        for (String s : CDSs) {
-            String a = s.substring(s.lastIndexOf("_") + 1);
-            String b = newCds.substring(newCds.lastIndexOf("_") + 1);
-            if (isSSExist("SS_"+a+"_"+b)){
-                ssSet.add("SS_"+a+"_"+b);
-            } else if (isSSExist("SS_"+b+"_"+a)) {
-                ssSet.add("SS_"+b+"_"+a);
-            } else {
-                throw new Exception();
-            }
-        }
-
-        return ssSet;
-    }
-
-    private void generateAndStartRs(String newCds) throws Exception {
-        Set<String> rsSet = generateRsForStartStop(newCds, runningCDSTopics);
-
-        for (String rs : rsSet) {
-            if(!isRSRunning(rs)) {
-                sendToStartKafka(rs);
-                runningRSTopics.add(rs);
-            }
-
-        }
-//        runningRSTopics.addAll(rsSet);
-    }
-
     private void generateAndCreateRs(String newCds) throws JsonProcessingException {
         Set<String> rsSet = generateRs(newCds, createdCDSTopics);
         for (String rs : rsSet) {
@@ -210,24 +122,6 @@ public class NameService {
             }
         }
 //        createdRSTopics.addAll(rsSet);
-    }
-
-    private Set<String> generateRsForStartStop(String newCds, Set<String> CDSs) throws Exception {
-        Set<String> rsNames = new HashSet<>();
-
-        for (String s : CDSs) {
-            String a = s.substring(s.lastIndexOf("_") + 1);
-            String b = newCds.substring(newCds.lastIndexOf("_") + 1);
-            if (isRSExist("RS_"+a+"_"+b)){
-                rsNames.add("RS_"+a+"_"+b);
-            } else if (isRSExist("RS_"+b+"_"+a)){
-                rsNames.add("RS_"+b+"_"+a);
-            } else {
-                throw new Exception();
-            }
-        }
-
-        return rsNames;
     }
 
     private Set<String> generateRs(String newCds, Set<String> CDSs) throws JsonProcessingException {
@@ -266,29 +160,6 @@ public class NameService {
         }
     }
 
-    private void stopCDS(String cds) throws JsonProcessingException {
-        if(isCDSRunning(cds)) {
-            sendToStopKafka(cds);
-        }
-    }
-
-    private void stopSS(Set<String> ss) throws JsonProcessingException {
-        for(String s : ss) {
-            if(isSSRunning(s)) {
-                sendToStopKafka(s);
-                runningSSTopics.remove(s);
-            }
-        }
-    }
-
-    private void stopRS(Set<String> rs) throws JsonProcessingException {
-        for(String r: rs) {
-            if(isRSRunning(r)) {
-                sendToStopKafka(r);
-                runningRSTopics.remove(r);
-            }
-        }
-    }
 
     private boolean isDSExist(String ds) {
         return createdDSTopics.contains(ds);
@@ -308,17 +179,5 @@ public class NameService {
 
     private boolean isDSRunning(String ds) {
         return runningDSTopics.contains(ds);
-    }
-
-    private boolean isCDSRunning(String cds) {
-        return runningCDSTopics.contains(cds);
-    }
-
-    private boolean isSSRunning(String ss) {
-        return runningSSTopics.contains(ss);
-    }
-
-    private boolean isRSRunning(String rs) {
-        return runningRSTopics.contains(rs);
     }
 }
