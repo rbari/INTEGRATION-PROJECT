@@ -138,31 +138,30 @@ public class NameService {
     }
 
     private void generateAndCreateSS(String newCds) throws JsonProcessingException {
-        Set<String> ssSet = generateSS(newCds, createdCDSTopics);
-        if(!ssSet.isEmpty()) {
-            sendToCreationKafka(new CreateServiceResponse("SS", String.valueOf(0), ssSet));
-        }
-        for (String ss : ssSet) {
-            if(!isSSExist(ss)){
-//                sendToCreationKafka(new CreateServiceResponse("SS", String.valueOf(0), Set.of(ss)));
-                createdSSTopics.add(ss);
+        Set<Set<String>> ssSet = generateSS(newCds, createdCDSTopics);
+        for (Set<String> ss : ssSet) {
+            if(!ss.isEmpty()){
+                sendToCreationKafka(new CreateServiceResponse("SS", String.valueOf(0), ss));
+                createdSSTopics.addAll(ss);
             }
         }
 
 //        createdSSTopics.addAll(ssSet);
     }
 
-    private Set<String> generateSS(String newCds, Set<String> CDSs) {
+    private Set<Set<String>> generateSS(String newCds, Set<String> CDSs) {
 
-        Set<String> ssSet = new HashSet<>();
+        Set<Set<String>> ssSet = new HashSet<>();
             for (String s : CDSs) {
+                Set<String> newSs = new HashSet<>();
                 String first = s.substring(s.lastIndexOf("_"));
                 String second = newCds.substring(newCds.lastIndexOf("_"));
                 if (!first.equals(second))
-                    ssSet.add("SS" + first);
-                    ssSet.add("SS" + second);
-
-//                    ssSet.add("SS" + first + second);
+                {
+                    newSs.add("SS" + first);
+                    newSs.add("SS" + second);
+                }
+                ssSet.add(newSs);
             }
 
         return ssSet;
