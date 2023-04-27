@@ -1,9 +1,7 @@
 package UnzipService;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.handler.annotation.Headers;
@@ -18,7 +16,7 @@ import java.util.zip.ZipInputStream;
 
 
 @Service
-public class UnzipService {
+public class UnzipService implements Serializable {
 
     @Autowired
     private Sender sender;
@@ -30,27 +28,22 @@ public class UnzipService {
     @KafkaListener(topics = "filedownloaded", groupId = "default")
     public void receive(@Payload String message, @Headers MessageHeaders headers) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        System.out.println("got a message from client: "+ message);
-        sender.send("fileunziped","The file has been unzipped");
-//        try {
-//            RequestWrapper requestWrapper = mapper.readValue(message, RequestWrapper.class);
-//            sender.send("fileunziped","The file has been unzipped");
-//            String zipFilePath = requestWrapper.getZipFilePath();
-//            String serviceName = requestWrapper.getServiceName();
-//            Set<String> topics = requestWrapper.getTopics();
-//            byte[] file = null;
-//
-//            file = new ClassPathResource(zipFilePath).getInputStream().readAllBytes();
-//            if(file != null){
-//                String unzipPath = unzip(file);
-//                RequestWrapper responseWrapper = new RequestWrapper(unzipPath,serviceName,topics);
-//                System.out.println("sending to kafka "+ responseWrapper );
-//                String jsonInString = mapper.writeValueAsString(responseWrapper);
-//                sender.send("fileunziped",jsonInString);
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            RequestWrapper requestWrapper = mapper.readValue(message, RequestWrapper.class);
+            byte[] zipFile = requestWrapper.getZipFile();
+            String serviceName = requestWrapper.getServiceName();
+            Set<String> topics = requestWrapper.getTopics();
+
+            if(zipFile != null){
+                String unzipPath = unzip(zipFile);
+                outputRequestWrapper outputRequestWrapper = new outputRequestWrapper(unzipPath,serviceName,topics);
+                System.out.println("sending to kafka "+ outputRequestWrapper );
+                String jsonInString = mapper.writeValueAsString(outputRequestWrapper);
+                sender.send("fileunziped",jsonInString);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public String unzip(byte[] file) throws IOException {

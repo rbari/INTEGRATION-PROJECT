@@ -1,25 +1,23 @@
 package UnzipService;
 
-import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Set;
 
-public class RequestWrapper implements Serializable {
+public class outputRequestWrapper {
 
-    private byte[] zipFile;
+    private String zipFilePath;
     private String serviceName;
     private Set<String> topics;
 
-    RequestWrapper(){}
+    outputRequestWrapper(){}
 
-    public RequestWrapper(byte[] zipFile, String serviceName, Set<String> topics ) {
-        this.zipFile = zipFile;
+    public outputRequestWrapper(String zipFilePath, String serviceName, Set<String> topics ) {
+        this.zipFilePath = zipFilePath;
         this.serviceName = serviceName;
         this.topics = topics;
     }
 
-    public byte[] getZipFile() {
-        return zipFile;
+    public String getzipFilePath() {
+        return zipFilePath;
     }
 
     public String getServiceName() {
@@ -32,8 +30,8 @@ public class RequestWrapper implements Serializable {
 
     @Override
     public String toString() {
-        return "RequestWrapper{" +
-                "zipFilePath='" + Arrays.toString(zipFile) + '\'' +
+        return "OutputRequestWrapper{" +
+                "zipFilePath='" + zipFilePath + '\'' +
                 ", serviceName='" + serviceName + '\'' +
                 ", topics=" + topics +
                 '}';
