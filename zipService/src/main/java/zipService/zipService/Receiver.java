@@ -1,5 +1,6 @@
 package zipService.zipService;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
@@ -7,30 +8,75 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.IOException;
+import java.util.Set;
+
+
 
 @Service
 public class Receiver {
-	
-	@Autowired
-	ZipController zipController;
+
 	@Autowired
 	Sender sender;
+
+	@Autowired
+	SupplierServiceClient supplierServiceClient;
 	
-	  @KafkaListener(topics = "DSGS_CREATION", groupId = "default")
-	public void receive(String message) throws JsonProcessingException {
-		  System.out.println("hello world");
-		  
+	@KafkaListener(topics = "DSGS_CREATION", groupId = "default")
+	public void receive(String message){
 		  try {
 
-	            System.out.println("Receiving");
-	            System.out.println(message);
-	            RequestWrapper rq = new RequestWrapper("Testing", message);
-	            zipController.downloadZip(message);
-	            sender.send("fileunziped", rq);
+			  ObjectMapper mapper = new ObjectMapper();
+			  System.out.println("got a message from client: "+ message);
+
+			  //converting the message to an object
+			  InputMessageWrapper inputMessageWrapper = mapper.readValue(message, InputMessageWrapper.class);
+
+			  String serviceName = inputMessageWrapper.getServiceName();
+			  Set<String> topics = inputMessageWrapper.getTopics();
+			  String interval = inputMessageWrapper.getInterval();
+
+			  // receiving file from css
+			  byte[] zipFile = getSourceCode(serviceName,topics,interval);
+
+//			  System.out.println("zipFile: "+zipFile);
+
+			  // sending message to unzip service
+			  RequestWrapper requestWrapper = new RequestWrapper(zipFile, serviceName, topics);
+			  System.out.println("sending to kafka "+ requestWrapper );
+
+			  // convert file to string before sending to kafka
+			  String jsonInString = mapper.writeValueAsString(requestWrapper);
+			  sender.send("filedownloaded",jsonInString);
+
 	        } catch (JsonProcessingException e) {
-	            throw new RuntimeException(e);
+			  	e.printStackTrace();
 	        }
-	    }
+	}
+
+	public byte[] getSourceCode(String serviceName, Set<String> topics, String interval) {
+		byte[] output = null;
+		try {
+			switch (serviceName){
+				case "cds":
+					output = supplierServiceClient.getCDSCode(String.join(",", topics)).getBody().getInputStream().readAllBytes();
+					break;
+				case "ss":
+					output = supplierServiceClient.getSSCode(String.join(",", topics)).getBody().getInputStream().readAllBytes();
+					break;
+				case "rs":
+					output = supplierServiceClient.getRSCode().getBody().getInputStream().readAllBytes();
+					break;
+				case "dis":
+					output = supplierServiceClient.getDIRCode(String.join(",", topics),interval).getBody().getInputStream().readAllBytes();
+					break;
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return output;
+	}
 		  
 }
 	  

@@ -1,31 +1,40 @@
 package zipService.zipService;
 
 
+import java.util.Set;
+
 public class RequestWrapper {
 
-    private String zipFilePath;
+    private byte[] zipFile;
     private String serviceName;
+    private Set<String> topics;
 
     RequestWrapper(){}
 
-    public RequestWrapper(String zipFilePath, String serviceName) {
-        this.zipFilePath = zipFilePath;
+    public RequestWrapper(byte[] zipFile, String serviceName, Set<String> topics) {
+        this.zipFile = zipFile;
         this.serviceName = serviceName;
+        this.topics = topics;
     }
 
-    public String getZipFilePath() {
-        return zipFilePath;
+    public byte[] getZipFile() {
+        return zipFile;
     }
 
     public String getServiceName() {
         return serviceName;
     }
 
+    public Set<String> getTopics() {
+        return topics;
+    }
+
     @Override
     public String toString() {
         return "RequestWrapper{" +
-                "zipFilePath='" + zipFilePath + '\'' +
+                "zipFile='" + zipFile + '\'' +
                 ", serviceName='" + serviceName + '\'' +
+                ", topics=" + topics +
                 '}';
     }
 }

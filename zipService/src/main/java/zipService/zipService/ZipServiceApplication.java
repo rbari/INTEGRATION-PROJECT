@@ -11,12 +11,8 @@ import org.springframework.kafka.annotation.EnableKafka;
 @EnableFeignClients
 @EnableKafka
 public class ZipServiceApplication {
-	
-	
 	public static void main(String[] args) {
-	
 		SpringApplication.run(ZipServiceApplication.class, args);
-	
 	}
 	
 	

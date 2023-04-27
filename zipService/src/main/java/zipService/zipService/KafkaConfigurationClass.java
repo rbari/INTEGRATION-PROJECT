@@ -43,7 +43,7 @@ public class KafkaConfigurationClass {
     }
 
     @Bean
-    public ProducerFactory<String, Object> producerFactory() {
+    public ProducerFactory<String, String> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put("bootstrap.servers", "alert-cricket-6290-us1-kafka.upstash.io:9092");
         configProps.put("sasl.mechanism", "SCRAM-SHA-256");
@@ -55,7 +55,7 @@ public class KafkaConfigurationClass {
     }
 
     @Bean
-    public KafkaTemplate<String, Object> kafkaTemplate() {
+    public KafkaTemplate<String, String> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
 }
