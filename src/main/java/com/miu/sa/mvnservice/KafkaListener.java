@@ -99,7 +99,7 @@ public class KafkaListener {
             if (os.contains("Mac")) {
                 mvnHome = env.getProperty("mvn.home.mac");
             } else {
-                mvnHome = "C:\\Users\\Edet Ebenezer\\Desktop\\maven\\bin\\mvn";
+                mvnHome = env.getProperty("mvn.home.windows");
             }
 
             request.setMavenHome(new File(mvnHome));
