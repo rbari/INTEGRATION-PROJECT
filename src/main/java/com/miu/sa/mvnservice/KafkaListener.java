@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 @Service
@@ -29,7 +30,7 @@ public class KafkaListener {
     public void listenToStartService(String serviceName) {
         Process process = null;
         try {
-            int port = getPortNumber(serviceName);
+            int port = getPortNumber(serviceName.replace("\"", ""));
             if (port != 0) {
                 String startCommand = "curl -X POST http://localhost:" + port + "/data-input/start";
                 process = Runtime.getRuntime().exec(startCommand);
@@ -45,7 +46,7 @@ public class KafkaListener {
     public void listenToStopService(String serviceName) {
         Process process = null;
         try {
-            int port = getPortNumber(serviceName);
+            int port = getPortNumber(serviceName.replace("\"", ""));
             if (port != 0) {
                 String stopCommand = "curl -X POST http://localhost:" + port + "/data-input/stop";
                 process = Runtime.getRuntime().exec(stopCommand);
@@ -57,9 +58,9 @@ public class KafkaListener {
         }
     }
 
-    private int getPortNumber(String serviceName) {
+    private int getPortNumber(String topics) {
         Optional<Integer> first = serviceDetails.stream()
-                .filter(services -> services.getServiceName().equals(serviceName))
+                .filter(services -> services.getServiceName().equals(topics))
                 .map(ServiceDetails::getPort).findFirst();
 
         return first.orElse(0);
@@ -81,13 +82,15 @@ public class KafkaListener {
 
     private void executeMvn(RequestWrapper requestWrapper) {
         execute(requestWrapper.getServiceName(), requestWrapper.getZipFilePath(), Arrays.asList("clean", "spring-boot:run " +
-                "-Dspring-boot.run.jvmArguments=\"-Dserver.port=" + port++ + " -Ddemo.topic=" + String.join("-", requestWrapper.getTopics()) + "\""));
+                        "-Dspring-boot.run.jvmArguments=\"-Dserver.port=" + port++ + " -Ddemo.topic=" + String.join("-", requestWrapper.getTopics()) + "\""),
+                requestWrapper.getTopics());
     }
 
-    private void execute(String serviceName, String dirPath, List<String> goals) {
+    private void execute(String serviceName, String dirPath, List<String> goals, Set<String> topics) {
         try {
             int p = port - 1;
             InvocationRequest request = new DefaultInvocationRequest();
+            request.setInputStream(InputStream.nullInputStream());
             request.setBaseDirectory(new File(dirPath));
             request.setGoals(goals);
 
@@ -96,7 +99,7 @@ public class KafkaListener {
             if (os.contains("Mac")) {
                 mvnHome = env.getProperty("mvn.home.mac");
             } else {
-                mvnHome = env.getProperty("mvn.home.windows");
+                mvnHome = "C:\\Users\\Edet Ebenezer\\Desktop\\maven\\bin\\mvn";
             }
 
             request.setMavenHome(new File(mvnHome));
@@ -116,7 +119,7 @@ public class KafkaListener {
                     e.printStackTrace();
                 }
             }).start();
-            serviceDetails.add(new ServiceDetails(serviceName, p));
+            serviceDetails.add(new ServiceDetails(topics.toString().replace("[", "").replace("]", ""), p));
             System.out.println("Service: " + serviceName + " running in port: " + p);
         } catch (Exception ex) {
             ex.printStackTrace();
