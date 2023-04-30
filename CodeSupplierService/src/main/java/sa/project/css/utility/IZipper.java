@@ -1,8 +1,5 @@
-package sa.project.codesupplierservice.utils;
+package sa.project.css.utility;
 
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
-
-import javax.servlet.ServletOutputStream;
 import java.io.IOException;
 
 public interface IZipper {

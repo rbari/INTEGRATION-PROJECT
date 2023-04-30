@@ -1,4 +1,4 @@
-package sa.project.codesupplierservice.utils;
+package sa.project.css.utility;
 
 public interface IWorkDirCreator {
     void createWorkDir();

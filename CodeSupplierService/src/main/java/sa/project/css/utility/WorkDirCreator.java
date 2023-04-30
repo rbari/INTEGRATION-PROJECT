@@ -1,8 +1,7 @@
-package sa.project.codesupplierservice.utils.impl;
+package sa.project.css.utility;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import sa.project.codesupplierservice.utils.IWorkDirCreator;
 
 import java.io.File;
 

@@ -1,15 +1,13 @@
-package sa.project.codesupplierservice.service.impl;
+package sa.project.css.service;
 
-
+import jakarta.servlet.ServletOutputStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import sa.project.codesupplierservice.service.ICodeSupplierService;
-import sa.project.codesupplierservice.utils.IZipper;
+import sa.project.css.utility.IZipper;
 
-import javax.servlet.ServletOutputStream;
 import java.io.*;
 import java.net.URL;
 import java.nio.channels.Channels;
@@ -17,15 +15,17 @@ import java.nio.channels.ReadableByteChannel;
 
 @Service
 @RequiredArgsConstructor
-public class RepoCodeSupplierService implements ICodeSupplierService {
+public class CodeSupplierService implements ICodeSupplierService{
 
     private final IZipper zipper;
-
-    @Value("${css.cds.src}")
-    private String cdsSrc;
-
+     @Value("${css.cds.src}")
+     private String cdsSrc;
     @Value("${css.ss.src}")
     private String ssSrc;
+
+    @Value("${css.dis.src}")
+    private String disSrc;
+
 
     @Value("${css.rs.src}")
     private String rsSrc;
@@ -45,6 +45,8 @@ public class RepoCodeSupplierService implements ICodeSupplierService {
     @Value("${css.ss.projectName}")
     private String ssProjectName;
 
+    @Value("${css.dis.projectName}")
+    private String disProjectName;
     private final static String APPLICATION_YML_REL_PATH = "/src/main/resources/application.yml";
     private final static int FILE_READ_CHAR_BUFFER_SIZE = 10;
 
@@ -54,6 +56,8 @@ public class RepoCodeSupplierService implements ICodeSupplierService {
             srcUrl = cdsSrc;
         else if (serviceName.equals("ss"))
             srcUrl = ssSrc;
+        else if (serviceName.equals("dis"))
+            srcUrl = disSrc;
         else
             srcUrl = rsSrc;
 
@@ -121,14 +125,22 @@ public class RepoCodeSupplierService implements ICodeSupplierService {
     }
 
     @Override
-    public void getRSCode(String topics, File workDir) throws IOException {
-        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Service not available for Reporting Service!");
+    public void getDISCode(String topic, String interval, File workDir) throws IOException {
+        //Output update
+        File applicationPropertiesFile = getApplicationPropertiesFile(workDir, disProjectName);
+        String propertiesString = getStringFromFile(applicationPropertiesFile);
+        String newPropertiesString = propertiesString.replace("$$output$$", topic);
+        writeContentToFile(applicationPropertiesFile, newPropertiesString);
+
+        //Interval update
+        File applicationPropertiesFile2 = getApplicationPropertiesFile(workDir, disProjectName);
+        String propertiesString2 = getStringFromFile(applicationPropertiesFile2);
+        String newPropertiesString2 = propertiesString2.replace("$$interval$$", interval);
+        writeContentToFile(applicationPropertiesFile, newPropertiesString2);
+
+
     }
 
-    private void validateServiceName(String serviceName) {
-        if (!serviceName.matches("^(cds)|(ss)|(rs)$"))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Allowed service names: cds, ss, rs!");
-    }
 
     private void validateTopics(String[] topics) {
         boolean isValid = true;
@@ -137,7 +149,7 @@ public class RepoCodeSupplierService implements ICodeSupplierService {
         }
         else {
             for (String topic : topics) {
-                if (!topic.matches("^(DS_\\d+)|(CDS_\\d+)|(SI_\\d+_\\d+)|(NSI_\\d+_\\d+)$")) {
+                if (!topic.matches("^(DS_\\d+)|(CDS_\\d+)|(SS_\\d+_\\d+)|(NSI_\\d+_\\d+)$")) {
                     isValid = false;
                     break;
                 }
@@ -150,10 +162,19 @@ public class RepoCodeSupplierService implements ICodeSupplierService {
     }
 
     @Override
-    public File getCode(String serviceName, String topics, ServletOutputStream servletOutputStream) throws IOException {
-        validateServiceName(serviceName);
+    public File getRSCode( ) throws IOException {
+        String serviceName="rs";
+        long currentTimeStamp = System.currentTimeMillis();
+        String zipSrc = zipDir + "/" + serviceName + "_" + currentTimeStamp + ".zip";
+        downloadZip(serviceName, zipSrc);
+        return new File(zipSrc);
+    }
+
+    @Override
+    public File getCDSCode(String topics) throws IOException {
         String[] topicArr = topics.split(" *, *");
         validateTopics(topicArr);
+        String serviceName="cds";
         long currentTimeStamp = System.currentTimeMillis();
         String zipSrc = zipDir + "/" + serviceName + "_" + currentTimeStamp + ".zip";
         String extractSrc = codeDir + "/" + serviceName + "_" + currentTimeStamp;
@@ -164,16 +185,58 @@ public class RepoCodeSupplierService implements ICodeSupplierService {
 
         downloadZip(serviceName, zipSrc);
         zipper.unZip(zipSrc, extractSrc);
-        switch (serviceName) {
-            case "cds" -> getCDSCode(topics, extractDir);
-            case "ss" -> getSSCode(topicArr[0], topicArr[1], extractDir);
-            case "rs" -> getRSCode(topics, extractDir);
-        };
+        getCDSCode(topics, extractDir);
+        File[] filesInExtractDir = extractDir.listFiles();
+        if (filesInExtractDir == null || filesInExtractDir.length == 0)
+            throw new IOException("Empty Extract Dir!");
+        zipper.zipDir(filesInExtractDir[0].getAbsolutePath(), exportSrc);
+        return new File(exportSrc);
+    }
+
+    @Override
+    public File getSSCode(String topics) throws IOException {
+        String[] topicArr = topics.split(" *, *");
+        validateTopics(topicArr);
+        String serviceName="ss";
+        long currentTimeStamp = System.currentTimeMillis();
+        String zipSrc = zipDir + "/" + serviceName + "_" + currentTimeStamp + ".zip";
+        String extractSrc = codeDir + "/" + serviceName + "_" + currentTimeStamp;
+        String exportSrc = zipOutDir + "/" + serviceName + "_" + currentTimeStamp + ".zip";
+        File extractDir = new File(extractSrc);
+        if (!extractDir.mkdir())
+            throw new IOException("Failed to create directory: " + extractDir);
+
+        downloadZip(serviceName, zipSrc);
+        zipper.unZip(zipSrc, extractSrc);
+        getSSCode(topicArr[0], topicArr[1], extractDir);
         File[] filesInExtractDir = extractDir.listFiles();
         if (filesInExtractDir == null || filesInExtractDir.length == 0)
             throw new IOException("Empty Extract Dir!");
         zipper.zipDir(filesInExtractDir[0].getAbsolutePath(), exportSrc);
 
+        return new File(exportSrc);
+    }
+    @Override
+    public File getDISCode(String topics,String interval) throws IOException {
+        String[] topicArr = topics.split(" *, *");
+        validateTopics(topicArr);
+
+        String serviceName="dis";
+        long currentTimeStamp = System.currentTimeMillis();
+        String zipSrc = zipDir + "/" + serviceName + "_" + currentTimeStamp + ".zip";
+        String extractSrc = codeDir + "/" + serviceName + "_" + currentTimeStamp;
+        String exportSrc = zipOutDir + "/" + serviceName + "_" + currentTimeStamp + ".zip";
+        File extractDir = new File(extractSrc);
+        if (!extractDir.mkdir())
+            throw new IOException("Failed to create directory: " + extractDir);
+
+        downloadZip(serviceName, zipSrc);
+        zipper.unZip(zipSrc, extractSrc);
+        getDISCode(topics,interval, extractDir);
+        File[] filesInExtractDir = extractDir.listFiles();
+        if (filesInExtractDir == null || filesInExtractDir.length == 0)
+            throw new IOException("Empty Extract Dir!");
+        zipper.zipDir(filesInExtractDir[0].getAbsolutePath(), exportSrc);
         return new File(exportSrc);
     }
 }

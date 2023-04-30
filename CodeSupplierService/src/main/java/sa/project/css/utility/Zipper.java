@@ -1,11 +1,7 @@
-package sa.project.codesupplierservice.utils.impl;
+package sa.project.css.utility;
 
 import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
-import sa.project.codesupplierservice.utils.IZipper;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.ServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
