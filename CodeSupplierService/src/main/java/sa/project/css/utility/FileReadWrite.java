@@ -1,11 +1,7 @@
-package sa.project.codesupplierservice.utils.impl;
+package sa.project.css.utility;
 
 import org.springframework.stereotype.Component;
-import sa.project.codesupplierservice.utils.ICodeReadWrite;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
