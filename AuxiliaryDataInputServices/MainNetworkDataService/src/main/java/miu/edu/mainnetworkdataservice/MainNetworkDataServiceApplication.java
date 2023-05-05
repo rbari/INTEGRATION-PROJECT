@@ -32,7 +32,7 @@ public class MainNetworkDataServiceApplication /*implements CommandLineRunner*/ 
 
                 String apiUrl = "http://localhost:19999/api/v1/data";
                 String osType = System.getProperty("os.name");
-                apiUrl += (osType == "Windows") ?  "?chart=system.in" : "?chart=system.ipv4";
+                apiUrl += (osType.toLowerCase().contains("Windows".toLowerCase())) ?  "?chart=system.ip" : "?chart=system.ipv4";
                 apiUrl += "&after=-2&format=json&points=1";
 
                 Metric data = networkDataService.getData(apiUrl);
