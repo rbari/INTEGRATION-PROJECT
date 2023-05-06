@@ -1,7 +1,6 @@
 package edu.miu.networkdataservice;
 
 import edu.miu.networkdataservice.domain.Metric;
-import edu.miu.networkdataservice.domain.NetworkData;
 import edu.miu.networkdataservice.service.NetworkDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -35,7 +34,7 @@ public class NetworkDataServiceApplication implements CommandLineRunner {
 
                 String apiUrl = "http://localhost:19999/api/v1/data";
                 String osType = System.getProperty("os.name");
-                apiUrl += (osType.toLowerCase().contains("Windows".toLowerCase())) ?  "?chart=system.ip" : "?chart=system.ipv4";
+                apiUrl += (osType.toLowerCase().contains("mac")) ? "?chart=system.ipv4" : "?chart=system.ip";
                 apiUrl += "&after=-2&format=json&points=1";
 
                 Metric data = networkDataService.getData(apiUrl);
